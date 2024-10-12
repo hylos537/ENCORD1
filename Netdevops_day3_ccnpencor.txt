@@ -1,0 +1,458 @@
+CCNP Encore 3: aka most important day. 
+why? all the hands-on lab 3/4 is today.
+
+1. Skills required: find the network
+address [for routing]
+
+ex:
+10.86.56.78/12 
+ospf
+= network 10.86.56.78 0.0.0.0 area 0
+= network 10.80.0.0 0.15.255.255 area 0
+ 
+
+10.100.88.5/13 =
+= 10.100.0.0 0.7.255.255
+172.16.150.11/19 =
+192.168.100.77/28 = 
+
+
+Task0: master CIDR for future TeamLeads.
+
+
+Task1:
+Cisco Catalyst Switch vs Nexus SpineLEAF
+stp, rstp, mistp              Cisco Aci
+
+step1: stp, rstp, Mistp?
+50k up wireshark
+25k up hugot method
+
+step2:
+bobo ba ang current network engr nyo
+madaling ma-hack
+
+
+
+apt install autoconf libgtk
+
+step3: 
+Master STP, Rapid stp, Multiple stp
+
+stp timers:
+forward delay fd = 15 sec
+max age = 15s
+classic states = block, listen, learn, forward
+
+
+@wireshark 3 patterns
+- unicast
+- broadcast
+- multicast
+
+=======
+
+how to get Fired Immediately Command:
+kill the expensive feature stp
+
+conf t
+no spanning-tree vlan 1-100 = removing stp
+
+conf t
+spanning-tree vlan 1-100 = putting back stp
+
+
+=======
+
+TASK1: The FIVE super heroes of ccnp switch
+
+
+1 Qpid 		802.1q   trunking
+core switch taas and baba
+conf t
+int range fa0/10-12
+ shutdown
+ no shutdown
+ switchport
+ switchport trunk Encap Dot1Q
+ switchport mode trunk
+ do sh int trunk
+
+
+======
+
+2 Darna   	802.1q 	 stp: primary/secondary root bridge:
+core taas primary and D1
+conf t
+spanning-tree mode pvst
+spanning-tree vlan 1-100 root Primary
+do show spanning-tree vlan 1
+
+core baba secondary and D2
+conf t
+spanning-tree mode pvst
+spanning-tree vlan 1-100 root Secondary
+do show spanning-tree vlan 1
+
+@kali 
+sudo su
+yersinia -G
+
+@gui launch attack
+cdp trunking enable ok
+8021q trunking enable ok
+
+@switch core baba or taas
+show cdp nei - it will show bunch of neihbors
+ex
+COREBABA-41#sh cdp nei
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone, 
+                  D - Remote, C - CVTA, M - Two-port Mac Relay 
+
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+EDGE41.rivanit.com
+                 Gig 0/1           128             R S I  ISR4321/K Gig 0/0/0
+SS00000          Fas 0/1           253          R T S H I yersinia  Eth 0
+WWWWWW0          Fas 0/1           253             R T I  yersinia  Eth 0
+000NNNN          Fas 0/1           244           R S H I  yersinia  Eth 0
+RRRR000          Fas 0/1           247            R T B S yersinia  Eth 0
+SSSS000          Fas 0/1           246            R T H I yersinia  Eth 0
+00000MM          Fas 0/1           244            S H I r yersinia  Eth 0
+SSSSSS0          Fas 0/1           242            R T B S yersinia  Eth 0
+VVVVVV0          Fas 0/1           248            R T B r yersinia  Eth 0
+00000QQ          Fas 0/1           243              B r   yersinia  Eth 0
+VV00000          Fas 0/1           254            R T B r yersinia  Eth 0
+0MMMMMM          Fas 0/1           251              B S   yersinia  Eth 0
+00000NN          Fas 0/1           251             R H I  yersinia  Eth 0
+0QQQQQQ          Fas 0/1           244              B r   yersinia  Eth 0
+RR00000          Fas 0/1           249            R T B S yersinia  Eth 0
+VVVV000          Fas 0/1           252            R T B r yersinia  Eth 0
+0RRRRRR          Fas 0/1           246             R B r  yersinia  Eth 0
+000RRRR          Fas 0/1           240            R S I r yersinia  Eth 0
+
+
+show process cpu | in util - it will have 99% util
+COREBABA-41#show process cpu 
+CPU utilization for five seconds: 99%/26%; one minute: 41%; five minutes: 15% <<<
+ PID Runtime(ms)     Invoked      uSecs   5Sec   1Min   5Min TTY Process 
+   1         195        1045        186  0.16%  0.03%  0.00%   0 Chunk Manager    
+   2          18        1180         15  0.00%  0.00%  0.00%   0 Load Meter       
+   3          67           5      13400  0.00%  0.00%  0.00%   0 hulc_entropy_thr 
+
+
+
+
+
+
+======
+
+
+3  Wonderwoman 	802.1w   rapid STP
+
+
+
+Etherchannle configuration (somewhat sub trunking / para sabay2 gamitin ang 3 cables in switch)
+CiscoProprietary/Original/Luma: PortAggregationControlProtocol - 1992 - Auto/Desirable
+LACP: link AggregationControlProtocol - 2004 - Active/Passive
+ex:
+core switch taas and baba
+conf t
+int range fa0/10-12
+ channel-group 1 mode active
+ channel-protocol Lacp
+ do sh etherchannel summary
+ do sh int po1 | inc BW
+
+D1
+conf t
+int range e0/1-2
+ channel-group 10 mode active
+ channel-protocol Lacp 
+int range e0/0,e0/3
+ channel-group 20 mode active
+ channel-protocol Lacp
+int range e1/2-3
+ channel-group 30 mode active
+ channel-protocol Lacp  
+
+
+D2
+conf t
+int range e0/1-2
+ channel-group 40 mode active
+ channel-protocol Lacp  
+int range e0/0,e0/3
+ channel-group 10 mode active
+ channel-protocol Lacp 
+int range e1/2-3
+ channel-group 30 mode active
+ channel-protocol Lacp 
+
+
+A1
+conf t
+int range e0/1-2
+ channel-group 10 mode active
+ channel-protocol Lacp  
+int range e0/2-3
+ channel-group 40 mode active
+ channel-protocol Lacp 
+
+A2
+conf t
+int range e0/1-2
+ channel-group 20 mode active
+ channel-protocol Lacp  
+int range e0/0,e0/3
+ channel-group 10 mode active
+ channel-protocol Lacp 
+
+
+
+
+Core taas baba
+conf t
+int gi0/1
+ switchport
+ switchport mode trunk encap dot1q
+ do show int trunk
+
+
+Port        Vlans allowed on trunk
+Gi0/1       1-4094
+Po1         1-4094
+
+
+
+conf t
+int gi0/1
+ udld port aggressive
+ do show udld
+
+Interface Gi0/1
+---
+Port enable administrative configuration setting: Enabled / in aggressive mode
+Port enable operational state: Enabled / in aggressive mode
+Current bidirectional state: Bidirectional
+Current operational state: Advertisement - Single neighbor detected
+Message interval: 15000
+Time out interval: 5000
+
+    Entry 1
+    ---
+    Expiration time: 30700
+    Device ID: 1
+    Current neighbor state: Bidirectional
+    Device name: FOC1445W1GN  
+    Port ID: Gi0/1  
+    Neighbor echo 1 device: FOC1445W6L1
+    Neighbor echo 1 port: Gi0/1
+
+    Message interval: 15
+    Time out interval: 5
+    CDP Device name: COREBABA-41  
+CORETAAS-41#
+CORETAAS-41#
+
+
+
+LAB3: rootguard, bpduguard and loopguard 
+BPDU guard putting in access port such as cctv,
+This will be putting in real switch or tunay na switch
+
+AP = bpdu root guard
+spanning-tree guard root
+
+
+
+
+TAAS: Rootbridge
+conf t
+spanning-tree mode Rapid-pvst
+spanning-tree BackBoneFast
+spanning-tree portfast bpduguard default
+int range fa0/1-8
+   spanning-tree Portfast
+   spanning-tree guard root
+end
+
+
+BABA: Secondary root bridge
+conf t
+spanning-tree mode Rapid-pvst
+spanning-tree UplinkFast
+spanning-tree portfast bpduguard default
+int range fa0/1-8
+   spanning-tree Portfast
+   spanning-tree guard root
+int range fa0/10-12
+   !trunkPorts Into: 
+   spanning-tree guard loop
+end
+
+
+
+
+CORETAAS-41#show int status err-disabled 
+
+Port      Name               Status       Reason               Err-disabled Vlans
+Fa0/3                        err-disabled bpduguard
+CORETAAS-41#
+CORETAAS-41#
+
+========
+
+tpos ma STP: rapid STP. going to MSTP 
+
+COREBABA-41#show spanning-tree mst configuration 
+% Switch is not in mst mode
+Name      []
+Revision  0     Instances configured 1
+
+Instance  Vlans mapped
+--------  ---------------------------------------------------------------------
+0         1-4094
+-------------------------------------------------------------------------------
+COREBABA-41#
+
+
+======
+
+
+4   Xmen		802.1s   multipleInstanceSTP
+
+
+
+
+LAB3: Multiple instance STP: 802.1s/Mst;
+
+step1 Configure VTP: vlanTrunkingProtocol:
+Taas:
+config t
+vtp domain ccnp
+vtp password pass
+vtp mode server
+vtp version 2
+exit
+
+Baba
+config t
+vtp domain ccnp
+vtp password pass
+vtp mode client
+vtp version 2
+exit
+
+
+step2 Create many vlans and deploy in different cpu instance
+TAAS:
+create vlans
+conf t
+vlan 11-19
+ex
+vlan 21-29
+ex
+vlan 31-39
+ex
+
+
+BABA:
+show vlan brief
+
+
+COREBABA-41#show vlan brief
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/1, Fa0/2, Fa0/3, Fa0/4, Fa0/5, Fa0/6, Fa0/7, Fa0/8, Fa0/9
+2    SAMPOLITO                        active    
+3    GAwaNiBABA                       active    
+10   WIFIVLAN                         active    
+11   VLAN0011                         active    
+12   VLAN0012                         active    
+13   VLAN0013                         active    
+14   VLAN0014                         active    
+15   VLAN0015                         active    
+16   VLAN0016                         active    
+17   VLAN0017                         active    
+18   VLAN0018                         active    
+19   VLAN0019                         active    
+21   VLAN0021                         active    
+22   VLAN0022                         active    
+23   VLAN0023                         active    
+24   VLAN0024                         active    
+25   pnp.gov.ph                       active    
+26   VLAN0026                         active    
+27   VLAN0027                         active    
+28   VLAN0028                         active    
+29   VLAN0029                         active    
+31   VLAN0031                         active    
+32   VLAN0032                         active    
+33   VLAN0033                         active    
+34   VLAN0034                         active    
+35   VLAN0035                         active    
+36   VLAN0036                         active    
+37   VLAN0037                         active    
+38   VLAN0038                         active    
+39   VLAN0039                         active    
+50   IPCCTVLAN                        active    
+69   UPPERMGMT                        active    
+70   ACCOUNTING                       active    
+71   HR                               active    
+100  VOICEVLAN                        active    
+1002 fddi-default                     act/unsup 
+1003 trcrf-default                    act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trbrf-default                    act/unsup 
+COREBABA-41#
+
+
+Note:
+- when you type show vlan brief at core taas you should see the added vlans at core baba which means its sychronize
+- if not workaround is put vtp mode server at core baba
+
+=======
+
+
+5   Superman	802.1x   portBased security
+
+
+cpu: vlan 11-19
+cpu: vlan 21-29
+cpu: vlan 31-39
+taas,baba,d1,d2,a1,a2
+
+conf t
+spanning-tree mode MST
+spanning-tree mst configuration
+ name supermanstp
+ revision 1
+   Instance 1 vlan 11-19
+   Instance 2 vlan 21-29
+   Instance 3 vlan 31-39
+exit
+show spanning-tree mst configuration
+
+CORETAAS-41#show spanning-tree mst configuration
+
+Name      [supermanstp]
+Revision  1     Instances configured 4
+
+Instance  Vlans mapped
+--------  ---------------------------------------------------------------------
+0         1-10,20,30,40-4094
+1         11-19
+2         21-29
+3         31-39
+-------------------------------------------------------------------------------
+CORETAAS-41#
+
+
+@VMWARE
+
+rm -r /etc/udev/
+y
+
+192.168.108.144
+
